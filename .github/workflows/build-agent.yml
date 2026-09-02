@@ -5,7 +5,8 @@ on:
     branches: [ "main", "master" ]
     paths:
       - 'agent/**'
-  workflow_dispatch:  # Permet de lancer manuellement depuis GitHub
+      - '.github/workflows/build-agent.yml'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -14,6 +15,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: false
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
@@ -22,10 +25,15 @@ jobs:
         uses: NuGet/setup-nuget@v2
 
       - name: Restore NuGet packages
-        run: nuget restore agent\C2Client.sln
+        run: nuget restore agent\C2Client.sln -PackagesDirectory agent\packages
 
       - name: Build Release
-        run: msbuild agent\C2Client.sln /p:Configuration=Release /p:Platform="Any CPU"
+        run: |
+          msbuild agent\C2Client.sln `
+            /p:Configuration=Release `
+            /p:Platform="Any CPU" `
+            /p:RestorePackages=false `
+            /v:minimal
 
       - name: Upload artifact (exe)
         uses: actions/upload-artifact@v4
