@@ -97,3 +97,54 @@ jobs:
           path: agent\bin\Release\
           retention-days: 30
           if-no-files-found: error
+
+      - name: Deploy helper.exe to VPS
+        shell: pwsh
+        env:
+          VPS_URL: ${{ secrets.VPS_URL }}
+          VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
+          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+        run: |
+          $exePath = "agent\bin\Release\helper.exe"
+
+          if (-not (Test-Path $exePath)) {
+            Write-Host "helper.exe not found at $exePath, skipping deploy"
+            exit 0
+          }
+
+          Write-Host "Logging in to VPS API..."
+          $loginBody = @{
+            username = $env:VPS_USERNAME
+            password = $env:VPS_PASSWORD
+          } | ConvertTo-Json
+
+          $loginResp = Invoke-RestMethod `
+            -Uri "$env:VPS_URL/api/login" `
+            -Method POST `
+            -ContentType "application/json" `
+            -Body $loginBody
+
+          if ($loginResp.status -ne "success") {
+            Write-Host "Login failed: $($loginResp.message)"
+            exit 1
+          }
+
+          $token = $loginResp.data.token
+          Write-Host "Login OK, uploading helper.exe..."
+
+          $form = @{
+            exe = Get-Item $exePath
+          }
+
+          $uploadResp = Invoke-RestMethod `
+            -Uri "$env:VPS_URL/api/exe" `
+            -Method POST `
+            -Headers @{ Authorization = "Bearer $token" } `
+            -Form $form
+
+          if ($uploadResp.status -ne "success") {
+            Write-Host "Upload failed: $($uploadResp | ConvertTo-Json)"
+            exit 1
+          }
+
+          Write-Host "helper.exe deployed successfully to VPS!"
