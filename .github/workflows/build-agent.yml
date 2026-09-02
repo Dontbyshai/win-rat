@@ -19,29 +19,76 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Restore packages.config packages (Fody, AForge, etc.)
-        run: .\nuget.exe install agent\packages.config -OutputDirectory packages
-
-      - name: Restore PackageReference packages
-        working-directory: agent
-        run: ..\nuget.exe restore C2Client.sln -PackagesDirectory ..\packages
-
-      - name: Verify Fody exists
+      - name: Download NuGet CLI
         shell: pwsh
         run: |
-          $fody = Get-ChildItem -Path "packages" -Recurse -Filter "Fody.targets" -ErrorAction SilentlyContinue | Select-Object -First 1
-          if ($fody) {
-            Write-Host "✅ Fody.targets found at: $($fody.FullName)"
-          } else {
-            Write-Host "❌ Fody.targets NOT found"
-            Write-Host "packages\ contents:"
-            Get-ChildItem packages | Select-Object Name
+          if (-not (Test-Path "nuget.exe")) {
+            Invoke-WebRequest -Uri "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" -OutFile "nuget.exe"
+          }
+          Write-Host "nuget.exe ready"
+
+      - name: Restore packages.config packages (Fody, AForge, etc.)
+        shell: pwsh
+        run: |
+          .\nuget.exe install agent\packages.config -OutputDirectory packages -NonInteractive
+          Write-Host "packages.config packages restored"
+
+      - name: Restore PackageReference packages
+        shell: pwsh
+        working-directory: agent
+        run: |
+          ..\nuget.exe restore C2Client.sln -PackagesDirectory ..\packages -NonInteractive
+          Write-Host "PackageReference packages restored"
+
+      - name: Verify critical build dependencies
+        shell: pwsh
+        run: |
+          $checks = @(
+            "packages\Fody.6.8.2\build\Fody.targets",
+            "packages\Costura.Fody.6.0.0\build\Costura.Fody.props",
+            "packages\Costura.Fody.6.0.0\build\Costura.Fody.targets"
+          )
+          $allOk = $true
+          foreach ($path in $checks) {
+            if (Test-Path $path) {
+              Write-Host "OK: $path"
+            } else {
+              Write-Host "MISSING: $path"
+              $allOk = $false
+            }
+          }
+          if (-not $allOk) {
+            Write-Host "Installed packages:"
+            Get-ChildItem packages | Select-Object Name | Format-Table -AutoSize
             exit 1
           }
 
       - name: Build Release
+        shell: pwsh
         working-directory: agent
-        run: msbuild C2Client.sln /p:Configuration=Release /p:Platform="Any CPU" /v:minimal
+        run: |
+          msbuild C2Client.sln `
+            /p:Configuration=Release `
+            /p:Platform="Any CPU" `
+            /p:RestorePackages=false `
+            /v:normal `
+            /maxcpucount `
+            /nologo
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "Build failed with exit code $LASTEXITCODE"
+            exit $LASTEXITCODE
+          }
+          Write-Host "Build succeeded"
+
+      - name: List build output
+        shell: pwsh
+        run: |
+          if (Test-Path "agent\bin\Release") {
+            Get-ChildItem "agent\bin\Release" | Format-Table Name, Length -AutoSize
+          } else {
+            Write-Host "Release directory not found"
+            exit 1
+          }
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -49,3 +96,4 @@ jobs:
           name: helper-Release
           path: agent\bin\Release\
           retention-days: 30
+          if-no-files-found: error
