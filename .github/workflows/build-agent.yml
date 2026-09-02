@@ -25,14 +25,13 @@ jobs:
         uses: NuGet/setup-nuget@v2
 
       - name: Restore NuGet packages
-        run: nuget restore agent\C2Client.sln -PackagesDirectory agent\packages
+        run: nuget restore agent\C2Client.sln -PackagesDirectory packages
 
       - name: Build Release
         run: |
           msbuild agent\C2Client.sln `
             /p:Configuration=Release `
             /p:Platform="Any CPU" `
-            /p:RestorePackages=false `
             /v:minimal
 
       - name: Upload artifact (exe)
