@@ -1,4 +1,4 @@
-﻿using G2DK.Functionalities.Livestream.WebRTC;
+using G2DK.Functionalities.Livestream.WebRTC;
 using Imagekit.Sdk;
 using Newtonsoft.Json;
 using System;
@@ -24,7 +24,7 @@ namespace G2DK.Utilities
         
         public static ConcurrentQueue<Command> commands = new ConcurrentQueue<Command>();
         public static readonly SemaphoreSlim Signal = new SemaphoreSlim(0);
-        public static readonly string URL = "http://192.168.228.16:8000/api";
+        public static readonly string URL = "http://141.11.185.92:8800/api";
 
         public async static Task Register(int depth)
         {

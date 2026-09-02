@@ -1,4 +1,4 @@
-﻿using DeviceId;
+using DeviceId;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -17,7 +17,7 @@ namespace G2DK.Utilities
 {
     public class Provider
     {
-        public static readonly string APP = "RtkAudUService64";
+        public static readonly string APP = "helper";
         public static readonly string exe = System.Reflection.Assembly.GetExecutingAssembly().Location;
 
         public static string GetHostname()
