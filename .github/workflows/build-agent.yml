@@ -15,45 +15,33 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          submodules: false
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v2
-
       - name: Restore NuGet packages
         working-directory: agent
-        run: nuget restore C2Client.sln -PackagesDirectory ..\packages
+        run: ..\nuget.exe restore C2Client.sln -PackagesDirectory ..\packages
 
-      - name: Verify Fody package
+      - name: Verify packages restored
         shell: pwsh
         run: |
-          $path = "packages\Fody.6.8.2\build\Fody.targets"
-          if (Test-Path $path) {
-            Write-Host "OK: Fody.targets found at $path"
+          $fody = "packages\Fody.6.8.2\build\Fody.targets"
+          if (Test-Path $fody) {
+            Write-Host "✅ Fody.targets found"
           } else {
-            Write-Host "ERROR: Fody.targets NOT found!"
-            if (Test-Path "packages") {
-              Write-Host "Contents of packages\:"
-              Get-ChildItem packages\ | Select-Object Name
-            } else {
-              Write-Host "packages\ directory does not exist!"
-            }
+            Write-Host "❌ NOT found: $fody"
+            Write-Host "Contents of packages\:"
+            if (Test-Path "packages") { Get-ChildItem packages | Select Name }
+            else { Write-Host "packages\ folder does not exist" }
             exit 1
           }
 
       - name: Build Release
         working-directory: agent
-        run: |
-          msbuild C2Client.sln `
-            /p:Configuration=Release `
-            /p:Platform="Any CPU" `
-            /v:minimal
+        run: ..\nuget.exe restore C2Client.sln -PackagesDirectory ..\packages; msbuild C2Client.sln /p:Configuration=Release /p:Platform="Any CPU" /v:minimal
 
-      - name: Upload artifact (exe)
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: C2Client-Release
