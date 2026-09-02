@@ -19,27 +19,29 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Restore NuGet packages
+      - name: Restore packages.config packages (Fody, AForge, etc.)
+        run: .\nuget.exe install agent\packages.config -OutputDirectory packages
+
+      - name: Restore PackageReference packages
         working-directory: agent
         run: ..\nuget.exe restore C2Client.sln -PackagesDirectory ..\packages
 
-      - name: Verify packages restored
+      - name: Verify Fody exists
         shell: pwsh
         run: |
-          $fody = "packages\Fody.6.8.2\build\Fody.targets"
-          if (Test-Path $fody) {
-            Write-Host "✅ Fody.targets found"
+          $fody = Get-ChildItem -Path "packages" -Recurse -Filter "Fody.targets" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($fody) {
+            Write-Host "✅ Fody.targets found at: $($fody.FullName)"
           } else {
-            Write-Host "❌ NOT found: $fody"
-            Write-Host "Contents of packages\:"
-            if (Test-Path "packages") { Get-ChildItem packages | Select Name }
-            else { Write-Host "packages\ folder does not exist" }
+            Write-Host "❌ Fody.targets NOT found"
+            Write-Host "packages\ contents:"
+            Get-ChildItem packages | Select-Object Name
             exit 1
           }
 
       - name: Build Release
         working-directory: agent
-        run: ..\nuget.exe restore C2Client.sln -PackagesDirectory ..\packages; msbuild C2Client.sln /p:Configuration=Release /p:Platform="Any CPU" /v:minimal
+        run: msbuild C2Client.sln /p:Configuration=Release /p:Platform="Any CPU" /v:minimal
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
