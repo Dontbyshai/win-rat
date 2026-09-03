@@ -44,6 +44,11 @@
 	 -webkit-font-smoothing: antialiased;
 	 -moz-osx-font-smoothing: grayscale;
 }
+ .app-content > main {
+	 flex: 1;
+	 overflow-y: auto;
+	 height: 100%;
+}
  .app-container {
 	 border-radius: 4px;
 	 width: 100%;
@@ -177,6 +182,7 @@
 	 max-height: 100%;
 	 display: flex;
 	 flex-direction: column;
+	 overflow: hidden;
 }
  .app-content-header {
 	 display: flex;
