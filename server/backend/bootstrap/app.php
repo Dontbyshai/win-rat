@@ -14,7 +14,6 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(HandleCors::class);
-        $middleware->statefulApi();
 
         $middleware->alias([
             'sse.auth' => \App\Http\Middleware\SseAuthMiddleware::class,

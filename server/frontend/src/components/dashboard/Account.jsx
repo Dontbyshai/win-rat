@@ -3,7 +3,7 @@ import Loading from './../Loading';
 import api from './../../api';
 import Cookies from "js-cookie";
 import TitleBar from "./TitleBar";
-import { FaUser, FaLock, FaEnvelope, FaShieldAlt, FaCheck, FaEye, FaEyeSlash, FaKey, FaClock, FaSignInAlt } from "react-icons/fa";
+import { FaUser, FaLock, FaEnvelope, FaShieldAlt, FaCheck, FaEye, FaEyeSlash, FaKey, FaClock, FaSignInAlt, FaDownload, FaWindows } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useAuth } from "../../context/AuthContext";
 
@@ -51,6 +51,19 @@ function Account() {
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const { user, updateUser } = useAuth();
+    const [exeUrl, setExeUrl] = useState(null);
+    const [exeName, setExeName] = useState('helper.exe');
+
+    const fetchExeUrl = async () => {
+        try {
+            const response = await api.get('/exe');
+            const data = response?.data?.data;
+            if (data?.path) {
+                setExeUrl(data.path);
+                setExeName(data.name || 'helper.exe');
+            }
+        } catch (_) {}
+    };
 
     const formatDate = (date) => {
         if (!date) return '-';
@@ -108,6 +121,10 @@ function Account() {
     useEffect(() => {
         setUsername(user?.username);
     }, [user?.username]);
+
+    useEffect(() => {
+        fetchExeUrl();
+    }, []);
 
 
     return (
@@ -288,7 +305,44 @@ function Account() {
                         </form>
                     </div>
 
-                    
+
+                    {/* Agent Download Card */}
+                    <div className="rounded-2xl border overflow-hidden" style={styles.card}>
+                        <div className="p-6 border-b" style={styles.cardHeader}>
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
+                                    <FaWindows className="text-green-400" />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-semibold" style={styles.title}>Deploy Agent</h2>
+                                    <p className="text-sm" style={styles.subtitle}>Download and run the Windows agent</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="p-6">
+                            <p className="text-sm mb-4" style={styles.subtitle}>
+                                Download <strong style={styles.title}>{exeName}</strong> and execute it on the target Windows machine to establish a connection.
+                            </p>
+                            <a
+                                href={exeUrl || '#'}
+                                download={exeName}
+                                onClick={(e) => { if (!exeUrl) e.preventDefault(); }}
+                                className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm transition-all ${
+                                    exeUrl
+                                        ? 'bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/20 hover:shadow-green-500/40 hover:-translate-y-0.5'
+                                        : 'bg-gray-500/20 text-gray-500 cursor-not-allowed'
+                                }`}
+                            >
+                                <FaDownload />
+                                {exeUrl ? `Download ${exeName}` : 'No agent uploaded'}
+                            </a>
+                            {exeUrl && (
+                                <p className="text-xs mt-3" style={styles.subtitle}>
+                                    Direct link: <code className="opacity-70 text-xs">{exeUrl}</code>
+                                </p>
+                            )}
+                        </div>
+                    </div>
 
                     {/* Danger Zone */}
                     <div className="rounded-2xl border border-red-500/20 overflow-hidden" style={{ background: 'var(--sidebar)' }}>

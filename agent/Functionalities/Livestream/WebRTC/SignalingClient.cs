@@ -1,4 +1,4 @@
-﻿using G2DK.Utilities;
+using G2DK.Utilities;
 using Newtonsoft.Json;
 using SIPSorcery.Net;
 using System;
@@ -35,7 +35,7 @@ namespace G2DK.Functionalities.Livestream.WebRTC
 
             _httpClient = new HttpClient
             {
-                BaseAddress = new Uri("http://192.168.122.1:8000" + "/"),
+                BaseAddress = new Uri(Communication.URL.Replace("/api", "") + "/"),
                 Timeout = TimeSpan.FromSeconds(30)
             };
             _httpClient.DefaultRequestHeaders.Accept.Add(
