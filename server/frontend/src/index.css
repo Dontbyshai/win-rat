@@ -528,8 +528,8 @@
 	 transform: scale(1.01);
 	 box-shadow: var(--filter-shadow);
 }
- .gridView .products-row:hover .cell-more-button {
-	 display: flex;
+ .gridView .products-row:hover .cell-actions {
+	 opacity: 1 !important;
 }
  @media screen and (max-width: 1024px) {
 	 .gridView .products-row {
