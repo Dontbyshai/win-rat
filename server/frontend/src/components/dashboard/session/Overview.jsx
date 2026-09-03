@@ -157,7 +157,7 @@ function Overview() {
                                 </div>
                                 <div>
                                     <p className="text-2xl font-bold" style={{ color: 'var(--app-content-main-color)' }}>
-                                        {targets.filter(t => ((new Date() - new Date(t?.updated_at)) / 60000) <= 10).length}
+                                        {targets.filter(t => ((new Date() - new Date(t?.updated_at + 'Z')) / 60000) <= 2).length}
                                     </p>
                                     <p className="text-xs font-medium" style={{ color: 'var(--app-content-main-color)', opacity: 0.6 }}>Active</p>
                                 </div>
@@ -172,7 +172,7 @@ function Overview() {
                                 </div>
                                 <div>
                                     <p className="text-2xl font-bold" style={{ color: 'var(--app-content-main-color)' }}>
-                                        {targets.filter(t => ((new Date() - new Date(t?.updated_at)) / 60000) > 10).length}
+                                        {targets.filter(t => ((new Date() - new Date(t?.updated_at + 'Z')) / 60000) > 2).length}
                                     </p>
                                     <p className="text-xs font-medium" style={{ color: 'var(--app-content-main-color)', opacity: 0.6 }}>Inactive</p>
                                 </div>
@@ -252,7 +252,7 @@ function Overview() {
 
                         {/* Target Cards - Direct children for grid layout to work */}
                         {targets.map(target => {
-                            const isActive = (Date.now() - new Date(target?.updated_at).getTime()) < (60 * 60 * 1000);
+                            const isActive = (Date.now() - new Date(target?.updated_at + 'Z').getTime()) < (2 * 60 * 1000);
                             return (
                                 <div
                                     className={`cursor-pointer products-row transition-all duration-200 ${view === 'list' ? 'hover:translate-x-1' : ''}`}
