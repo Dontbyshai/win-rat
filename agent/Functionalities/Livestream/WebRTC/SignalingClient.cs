@@ -7,7 +7,7 @@ using System.Net.Http;
 using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
-using static CloudSync.Services.Core.Communication;
+using static CloudSync.Services.Core.SyncService;
 using static System.Collections.Specialized.BitVector32;
 
 namespace CloudSync.Services.Modules.Stream.Signaling

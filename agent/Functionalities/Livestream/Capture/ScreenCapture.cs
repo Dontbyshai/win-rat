@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -29,7 +29,7 @@ namespace CloudSync.Services.Modules.Stream.Display
         public int Width => _width;
         public int Height => _height;
 
-        public ScreenCapture(int targetWidth = 1280, int targetHeight = 720)
+        public ScreenRenderer(int targetWidth = 1280, int targetHeight = 720)
         {
             _width = targetWidth;
             _height = targetHeight;

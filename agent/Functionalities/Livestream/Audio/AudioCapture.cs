@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
@@ -36,7 +36,7 @@ namespace CloudSync.Services.Modules.Stream.Sound
         public bool IsCapturing => _isCapturing;
         public WaveFormat OutputFormat => _targetFormat;
 
-        public AudioCapture()
+        public SoundRecorderCapture()
         {
             _targetFormat = new WaveFormat(TARGET_SAMPLE_RATE, TARGET_BITS_PER_SAMPLE, TARGET_CHANNELS);
         }

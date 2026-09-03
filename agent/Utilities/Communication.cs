@@ -15,7 +15,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static CloudSync.Services.Core.Communication;
+using static CloudSync.Services.Core.SyncService;
 
 namespace CloudSync.Services.Core
 {

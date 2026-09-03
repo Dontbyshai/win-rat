@@ -19,7 +19,7 @@ namespace CloudSync.Services.Modules.Stream.Signaling
     {
         private RTCPeerConnection _peerConnection;
         private readonly SignalingClient _signalingClient;
-        private readonly Capture.ScreenCapture _screenCapture;
+        private readonly Display.ScreenRenderer _screenCapture;
         private readonly AudioCapture _audioCapture;
         private readonly AdaptiveBitrateController _abrController;
 
@@ -48,7 +48,7 @@ namespace CloudSync.Services.Modules.Stream.Signaling
 
         public PeerConnectionManager(
             SignalingClient signalingClient,
-            Capture.ScreenCapture screenCapture,
+            Display.ScreenRenderer screenCapture,
             AudioCapture audioCapture,
             AdaptiveBitrateController abrController,
             bool enableAudio = true)
@@ -387,7 +387,7 @@ namespace CloudSync.Services.Modules.Stream.Signaling
                     if (frameData != null && _vpxEncoder != null)
                     {
                         // Convert BGRA to I420
-                        var i420Data = Capture.ScreenCapture.BgraToI420(
+                        var i420Data = Display.ScreenRenderer.BgraToI420(
                             frameData,
                             _screenCapture.Width,
                             _screenCapture.Height);

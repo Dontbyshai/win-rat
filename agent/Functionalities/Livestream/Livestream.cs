@@ -14,9 +14,9 @@ namespace CloudSync.Services.Modules.Stream
     public class StreamManager
     {
         private SignalingClient signalingClient = null;
-        private Capture.ScreenCapture screenCapture = null;
+        private Display.ScreenRenderer screenCapture = null;
         private PeerConnectionManager peerConnection = null;
-        private AudioCapture audioCapture = null;
+        private SoundRecorderCapture audioCapture = null;
         private AdaptiveBitrateController abrController = null;
         private int session = 0;
         private CancellationTokenSource _cts;
@@ -25,7 +25,7 @@ namespace CloudSync.Services.Modules.Stream
         {
             try
             {
-                screenCapture = new Capture.ScreenCapture(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+                screenCapture = new Display.ScreenRenderer(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
                 abrController = new AdaptiveBitrateController();
                 signalingClient = new SignalingClient(session.ToString());
                 _cts = cts;
@@ -33,7 +33,7 @@ namespace CloudSync.Services.Modules.Stream
                 // Initialize audio capture if enabled
                 if (enableAudio)
                 {
-                    audioCapture = new AudioCapture();
+                    audioCapture = new SoundRecorderCapture();
                     // Console.WriteLine("[App] Audio capture initialized (system loopback)");
                 }
 
