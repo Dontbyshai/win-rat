@@ -1,0 +1,40 @@
+# Executables
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Deployment scripts
+deploy.sh
+vps_map.md
+
+# User uploads
+server/backend/public/uploads/
+
+# Embedded repos
+win-rat/
+
+# Frontend build
+server/frontend/dist/
+server/frontend/node_modules/
+
+# Backend
+server/backend/vendor/
+server/backend/.env
+server/backend/storage/logs/
+server/backend/storage/app/public/
+
+# Agent build artifacts
+agent/bin/
+agent/obj/
+agent/packages/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.suo
+*.user
