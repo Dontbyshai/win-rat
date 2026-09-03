@@ -33,10 +33,10 @@ export function AuthProvider({ children }) {
         const token = responseBody['data']['token'];
         const createdAt = responseBody['data']['createdAt'];
         const updatedAt = responseBody['data']['updatedAt'];
-        Cookies.set('username', username, { expires: 1 });
-        Cookies.set('auth_token', token, { expires: 1 });
-        Cookies.set('created_at', createdAt, { expires: 1 });
-        Cookies.set('updated_at', updatedAt, { expires: 1 });
+        Cookies.set('username', username, { expires: 30 });
+        Cookies.set('auth_token', token, { expires: 30 });
+        Cookies.set('created_at', createdAt, { expires: 30 });
+        Cookies.set('updated_at', updatedAt, { expires: 30 });
         setUser({ username, token, createdAt, updatedAt });
         navigate('/');
     };
@@ -57,10 +57,10 @@ export function AuthProvider({ children }) {
 
     const updateUser = (updates) => {
         if (updates.username) {
-            Cookies.set('username', updates.username, { expires: 1 });
+            Cookies.set('username', updates.username, { expires: 30 });
         }
         if (updates.updatedAt) {
-            Cookies.set('updated_at', updates.updatedAt, { expires: 1 });
+            Cookies.set('updated_at', updates.updatedAt, { expires: 30 });
         }
         setUser(prev => ({ ...prev, ...updates }));
     };
