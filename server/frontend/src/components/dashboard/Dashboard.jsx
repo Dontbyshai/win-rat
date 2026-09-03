@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { FaHome, FaSignOutAlt, FaUser, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaHome, FaSignOutAlt, FaUser, FaChevronLeft, FaChevronRight, FaWindows } from "react-icons/fa";
 import { BsFiletypeExe } from "react-icons/bs";
 import { HiOutlineMenuAlt2 } from "react-icons/hi";
 import { useAuth } from "../../context/AuthContext";
@@ -20,6 +20,7 @@ function Dashboard() {
     const navItems = [
         { label: "Overview", path: "/dashboard/session", icon: FaHome },
         { label: "Executable", path: "/dashboard/executable", icon: BsFiletypeExe },
+        { label: "Windows", path: "/dashboard/windows", icon: FaWindows },
         { label: "Account", path: "/dashboard/account", icon: FaUser },
     ];
 

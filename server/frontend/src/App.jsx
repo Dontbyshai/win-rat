@@ -9,6 +9,7 @@ import Session from './components/dashboard/session/Session'
 import Account from "./components/dashboard/Account";
 import { ToastContainer } from "react-toastify";
 import Executable from "./components/dashboard/Executable";
+import Windows from "./components/dashboard/Windows";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
@@ -44,6 +45,7 @@ function App() {
           </Route>
           <Route path="executable" element={<Executable />} />
           <Route path="account" element={<Account />} />
+          <Route path="windows" element={<Windows />} />
         </Route>
       </Routes>
       <ToastContainer
