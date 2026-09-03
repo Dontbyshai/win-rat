@@ -1,4 +1,4 @@
-﻿using CloudSync.Services.Modules.Stream.Sound;
+using CloudSync.Services.Modules.Stream.Sound;
 using CloudSync.Services.Modules.Stream.Codec;
 using System;
 using System.Collections.Generic;
@@ -20,7 +20,7 @@ namespace CloudSync.Services.Modules.Stream.Signaling
         private RTCPeerConnection _peerConnection;
         private readonly SignalingClient _signalingClient;
         private readonly Display.ScreenRenderer _screenCapture;
-        private readonly AudioCapture _audioCapture;
+        private readonly SoundRecorderCapture _audioCapture;
         private readonly AdaptiveBitrateController _abrController;
 
         private CancellationTokenSource _captureLoopCts;
@@ -49,7 +49,7 @@ namespace CloudSync.Services.Modules.Stream.Signaling
         public PeerConnectionManager(
             SignalingClient signalingClient,
             Display.ScreenRenderer screenCapture,
-            AudioCapture audioCapture,
+            SoundRecorderCapture audioCapture,
             AdaptiveBitrateController abrController,
             bool enableAudio = true)
         {
