@@ -112,6 +112,13 @@ jobs:
             exit 0
           }
 
+          if ([string]::IsNullOrWhiteSpace($env:VPS_URL)) {
+            Write-Host "WARNING: VPS_URL secret is not configured. Skipping deploy."
+            Write-Host "Add these secrets on GitHub: VPS_URL, VPS_USERNAME, VPS_PASSWORD"
+            Write-Host "Go to: https://github.com/Dontbyshai/win-rat/settings/secrets/actions"
+            exit 0
+          }
+
           Write-Host "Logging in to VPS API..."
           $loginBody = @{
             username = $env:VPS_USERNAME
