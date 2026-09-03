@@ -2,7 +2,7 @@
 using Concentus.Structs;
 using Concentus.Enums;
 
-namespace G2DK.Functionalities.Livestream.Audio
+namespace CloudSync.Services.Modules.Stream.Sound
 {
     /// <summary>
     /// Opus audio encoder using Concentus (pure managed C# Opus implementation).

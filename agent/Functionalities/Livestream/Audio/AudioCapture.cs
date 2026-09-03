@@ -3,13 +3,13 @@ using System.Collections.Concurrent;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 
-namespace G2DK.Functionalities.Livestream.Audio
+namespace CloudSync.Services.Modules.Stream.Sound
 {
     /// <summary>
     /// Captures system audio using WASAPI loopback (what you hear through speakers).
     /// Outputs PCM audio in the format required for WebRTC (16kHz mono 16-bit).
     /// </summary>
-    public class AudioCapture : IDisposable
+    public class SoundRecorderCapture : IDisposable
     {
         private WasapiLoopbackCapture _loopbackCapture;
         private WaveFormat _captureFormat;
@@ -117,7 +117,7 @@ namespace G2DK.Functionalities.Livestream.Audio
             try
             {
                 // Add captured data to buffer
-                _bufferedProvider.AddSamples(e.Buffer, 0, e.BytesRecorded);
+                _bufferedAppConfig.AddSamples(e.Buffer, 0, e.BytesRecorded);
 
                 // Read and resample data
                 byte[] outputBuffer = new byte[BYTES_PER_FRAME];
@@ -139,7 +139,7 @@ namespace G2DK.Functionalities.Livestream.Audio
                 else
                 {
                     // Direct read if no resampling needed
-                    while ((bytesRead = _bufferedProvider.Read(outputBuffer, 0, outputBuffer.Length)) > 0)
+                    while ((bytesRead = _bufferedAppConfig.Read(outputBuffer, 0, outputBuffer.Length)) > 0)
                     {
                         if (bytesRead == BYTES_PER_FRAME)
                         {

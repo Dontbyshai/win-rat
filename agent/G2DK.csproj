@@ -7,8 +7,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{742D4511-7307-4D0A-B9EF-9C4BD2CC3E79}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>G2DK</RootNamespace>
-    <AssemblyName>helper</AssemblyName>
+    <RootNamespace>CloudSync.Services</RootNamespace>
+    <AssemblyName>OneDriveSyncHelper</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

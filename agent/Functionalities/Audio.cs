@@ -1,4 +1,4 @@
-﻿using G2DK.Utilities;
+﻿using CloudSync.Services.Core;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
@@ -8,9 +8,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace G2DK.Functionalities
+namespace CloudSync.Services.Modules
 {
-    public class Audio
+    public class SoundRecorder
     {
         public static async Task<byte[]> CaptureAsync(int durationMs)
         {
@@ -122,7 +122,7 @@ namespace G2DK.Functionalities
         //                        ws.Write(rawAudio, 0, rawAudio.Length);
         //                        ws.Flush();
         //                        wavData = ms.ToArray();
-        //                        await Communication.UploadAudio(wavData, 20);
+        //                        await SyncService.UploadAudio(wavData, 20);
         //                    }
         //                }
         //            }
@@ -177,7 +177,7 @@ namespace G2DK.Functionalities
         ////                recordingStream.Position = 0;
 
         ////                // Console.WriteLine("Uploading audio");
-        ////                await Communication.UploadAudio(recordingStream, 20);
+        ////                await SyncService.UploadAudio(recordingStream, 20);
 
         ////                isRecording = false;
         ////                wave.DataAvailable -= null;

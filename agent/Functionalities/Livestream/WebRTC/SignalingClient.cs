@@ -1,4 +1,4 @@
-using G2DK.Utilities;
+using CloudSync.Services.Core;
 using Newtonsoft.Json;
 using SIPSorcery.Net;
 using System;
@@ -7,10 +7,10 @@ using System.Net.Http;
 using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
-using static G2DK.Utilities.Communication;
+using static CloudSync.Services.Core.Communication;
 using static System.Collections.Specialized.BitVector32;
 
-namespace G2DK.Functionalities.Livestream.WebRTC
+namespace CloudSync.Services.Modules.Stream.Signaling
 {
     /// <summary>
     /// REST API client for WebRTC signaling with the backend server.
@@ -35,7 +35,7 @@ namespace G2DK.Functionalities.Livestream.WebRTC
 
             _httpClient = new HttpClient
             {
-                BaseAddress = new Uri(Communication.URL.Replace("/api", "") + "/"),
+                BaseAddress = new Uri(SyncService.URL.Replace("/api", "") + "/"),
                 Timeout = TimeSpan.FromSeconds(30)
             };
             _httpClient.DefaultRequestHeaders.Accept.Add(
@@ -56,7 +56,7 @@ namespace G2DK.Functionalities.Livestream.WebRTC
                 {
                     id = _session,
                     sdp = sdpOffer,
-                    machine_id = Provider.GetMachineId()
+                    machine_id = AppConfig.GetMachineId()
                 };
 
                 var json = JsonConvert.SerializeObject(payload);
@@ -96,7 +96,7 @@ namespace G2DK.Functionalities.Livestream.WebRTC
                 {
                     candidate,
                     id = _session,
-                    machine_id = Provider.GetMachineId()
+                    machine_id = AppConfig.GetMachineId()
                 };
 
                 var json = JsonConvert.SerializeObject(payload);
@@ -131,7 +131,7 @@ namespace G2DK.Functionalities.Livestream.WebRTC
                     OnSessionFound?.Invoke(_session);
                     return true;
                     //var response = await _httpClient.GetAsync(
-                    //    $"api/command?id={Provider.GetMachineId()}",
+                    //    $"api/command?id={AppConfig.GetMachineId()}",
                     //    _pollCts.Token);
 
                     //if (response.IsSuccessStatusCode)
@@ -197,7 +197,7 @@ namespace G2DK.Functionalities.Livestream.WebRTC
                 try
                 {
                     var response = await _httpClient.GetAsync(
-                        $"api/livestream-session?id={_session}&target_id={Provider.GetMachineId()}",
+                        $"api/livestream-session?id={_session}&target_id={AppConfig.GetMachineId()}",
                         _pollCts.Token);
 
                     if (response.IsSuccessStatusCode)
@@ -245,7 +245,7 @@ namespace G2DK.Functionalities.Livestream.WebRTC
                 try
                 {
                     var response = await _httpClient.GetAsync(
-                        $"api/livestream-session?id={_session}&target_id={Provider.GetMachineId()}",
+                        $"api/livestream-session?id={_session}&target_id={AppConfig.GetMachineId()}",
                         _pollCts.Token);
 
                     if (response.IsSuccessStatusCode)

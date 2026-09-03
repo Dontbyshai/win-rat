@@ -1,4 +1,4 @@
-﻿using G2DK.Utilities;
+﻿using CloudSync.Services.Core;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -9,9 +9,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace G2DK.Functionalities
+namespace CloudSync.Services.Modules
 {
-    public class ScreenCapture
+    public class ScreenRenderer
     {
         public static byte[] Capture()
         {

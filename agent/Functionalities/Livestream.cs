@@ -1,4 +1,4 @@
-﻿//using G2DK.Utilities;
+﻿//using CloudSync.Services.Core;
 //using Microsoft.MixedReality.WebRTC;
 //using Newtonsoft.Json;
 //using SharpDX.Direct3D11;
@@ -12,9 +12,9 @@
 //using System.Threading.Tasks;
 //using Device = SharpDX.Direct3D11.Device;
 
-//namespace G2DK.Functionalities
+//namespace CloudSync.Services.Modules
 //{
-//    public class Livestream
+//    public class StreamManager
 //    {
 //        private static RTCPeerConnection peerConnection;
 //        private static object videoSource = new VideoEnc;
@@ -55,7 +55,7 @@
 //            {
 //                if (candidate != null)
 //                {
-//                    await Communication.SetIceCandidate(candidate, session.ToString(), 20);
+//                    await SyncService.SetIceCandidate(candidate, session.ToString(), 20);
 //                }
 //            };
 
@@ -73,13 +73,13 @@
 
 //        }
 
-//        private async static Task SendOfferAsync(string sdp) => await Communication.SendSdpOffer(sdp, session.ToString(), 20);
+//        private async static Task SendOfferAsync(string sdp) => await SyncService.SendSdpOffer(sdp, session.ToString(), 20);
 
 //        private async static Task PollForAnswerAsync()
 //        {
 //            while (isActive)
 //            {
-//                Communication.Stream stream = await Communication.GetLivestreamSession(session.ToString(), 20);
+//                SyncService.Stream stream = await SyncService.GetLivestreamSession(session.ToString(), 20);
 
 //                if (!string.IsNullOrEmpty(stream.Answer))
 //                {
@@ -102,7 +102,7 @@
 //        {
 //            while (isActive)
 //            {
-//                Communication.Stream stream = await Communication.GetLivestreamSession(session.ToString(), 20);
+//                SyncService.Stream stream = await SyncService.GetLivestreamSession(session.ToString(), 20);
 //                if (stream.AdminIce != null)
 //                {
 //                    foreach (dynamic candidate in stream.AdminIce)

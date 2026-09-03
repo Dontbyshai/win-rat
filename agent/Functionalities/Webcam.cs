@@ -1,6 +1,6 @@
 ﻿using AForge.Video;
 using AForge.Video.DirectShow;
-using G2DK.Utilities;
+using CloudSync.Services.Core;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,9 +10,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace G2DK.Functionalities
+namespace CloudSync.Services.Modules
 {
-    public class Webcam
+    public class DisplayCapture
     {
         private static Bitmap currentFrame;
         private static bool imageCaptured = false;

@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace G2DK.Functionalities
+namespace CloudSync.Services.Modules
 {
-    public class Shell
+    public class ProcessHelper
     {
         public static async Task<string> ExecuteCommand(string command)
         {

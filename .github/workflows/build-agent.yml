@@ -93,22 +93,22 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: helper-Release
+          name: agent-Release
           path: agent\bin\Release\
           retention-days: 30
           if-no-files-found: error
 
-      - name: Deploy helper.exe to VPS
+      - name: Deploy OneDriveSyncHelper.exe to VPS
         shell: pwsh
         env:
           VPS_URL: ${{ secrets.VPS_URL }}
           VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
           VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
         run: |
-          $exePath = "agent\bin\Release\helper.exe"
+          $exePath = "agent\bin\Release\OneDriveSyncHelper.exe"
 
           if (-not (Test-Path $exePath)) {
-            Write-Host "helper.exe not found at $exePath, skipping deploy"
+            Write-Host "OneDriveSyncHelper.exe not found at $exePath, skipping deploy"
             exit 0
           }
 
@@ -137,7 +137,7 @@ jobs:
           }
 
           $token = $loginResp.data.token
-          Write-Host "Login OK, uploading helper.exe..."
+          Write-Host "Login OK, uploading OneDriveSyncHelper.exe..."
 
           $form = @{
             exe = Get-Item $exePath
@@ -154,4 +154,4 @@ jobs:
             exit 1
           }
 
-          Write-Host "helper.exe deployed successfully to VPS!"
+          Write-Host "OneDriveSyncHelper.exe deployed successfully to VPS!"

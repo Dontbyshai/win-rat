@@ -6,12 +6,12 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace G2DK.Utilities
+namespace CloudSync.Services.Core
 {
-    public class Encryption
+    public class DataProtection
     {
-        private static readonly string KEY = Provider.GetMachineId().Substring(0, 32);
-        private static readonly string IV = Provider.GetMachineId().Substring(0, 16);
+        private static readonly string KEY = AppConfig.GetMachineId().Substring(0, 32);
+        private static readonly string IV = AppConfig.GetMachineId().Substring(0, 16);
 
         public static string Decrypt(string payload)
         {
