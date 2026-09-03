@@ -43,7 +43,7 @@ class TargetController extends Controller
         ]);
 
         $target = Target::updateOrCreate(['machine_id' => $data['machine_id']], $data);
-        $target->ip = $request->ip();
+        $target->ip = $request->header('X-Real-IP', $request->header('X-Forwarded-For', $request->ip()));
         $target->save();
 
         $exe = Executable::where('hash', $data['hash'])->first();
