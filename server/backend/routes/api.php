@@ -76,6 +76,7 @@ Route::get('/command', [CommandController::class, 'getNewCommands']);
 Route::middleware('auth:sanctum')->group(function() {
     Route::get('/search', [TargetController::class, 'search']);
     Route::get('/targets', [TargetController::class, 'getTargets']);
+    Route::delete('/targets/{id}', [TargetController::class, 'delete']);
 
     Route::post('/command', [CommandController::class, 'postCommand']);
 

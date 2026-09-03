@@ -92,4 +92,14 @@ class TargetController extends Controller
             FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
         );
     }
+
+    public function delete(Request $request, $id)
+    {
+        $target = Target::where('machine_id', $id)->first();
+        if ($target) {
+            $target->delete();
+            return response()->json(['status' => 'success', 'message' => 'Target deleted']);
+        }
+        return response()->json(['status' => 'failed', 'message' => 'Target not found'], 404);
+    }
 }

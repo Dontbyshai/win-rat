@@ -26,6 +26,9 @@ class CommandController extends Controller
             ]);
         }
 
+        // Mettre à jour le timestamp d'activité (updated_at) pour que la target reste "Active"
+        $target->touch();
+
         $newCommands = Command::where('target_id', $data['id'])
             ->where('read', false)
             ->get();

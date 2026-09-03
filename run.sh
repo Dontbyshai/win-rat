@@ -3,7 +3,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 cd "$SCRIPT_DIR/server/backend"
-php artisan serve --host=0.0.0.0 &
+php artisan serve --host=0.0.0.0 --port=8800 &
 BACKEND_PID=$!
 
 cd "$SCRIPT_DIR/server/frontend"

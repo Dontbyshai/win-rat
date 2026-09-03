@@ -3,13 +3,8 @@
 return [
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
     'allowed_methods'   => ['*'],
-    'allowed_origins'   => [
-        'http://localhost:5173',
-        'http://localhost:5174',
-    ],
-    'allowed_origins_patterns' => [
-        '/^https?:\/\/([a-z0-9-]+\.)?annaponsprojects\.com$/',
-    ],
+    'allowed_origins'   => ['*'],
+    'allowed_origins_patterns' => [],
     'allowed_headers'   => ['*'],
     'exposed_headers'   => [],
     'max_age'           => 3600,

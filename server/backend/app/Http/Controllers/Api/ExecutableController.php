@@ -45,7 +45,7 @@ class ExecutableController extends Controller
     public function update(Request $request)
     {
         $data = $request->validate([
-            'exe' => 'required|file|mimes:exe',
+            'exe' => 'required|file',
         ]);
 
         $exe = $request->file('exe');
@@ -54,7 +54,7 @@ class ExecutableController extends Controller
         $cleanedName = preg_replace('/[^A-Za-z0-9._-]/', '_', $exe->getClientOriginalName());
         
         $exe->move(public_path('uploads/executable'), $cleanedName);
-        $path = 'uploads/executable/' . $exe->getClientOriginalName();
+        $path = 'uploads/executable/' . $cleanedName;
 
         // Generate hash (real path)
         $hash = hash_file('sha256', public_path($path));

@@ -423,25 +423,6 @@ function Windows() {
             <ConfirmModal item={modalItem} onConfirm={handleConfirm} onClose={() => setModalItem(null)} />
 
             <div style={{ padding: '0 16px 32px' }}>
-                {/* Avertissement */}
-                <div style={{
-                    background: 'rgba(245,158,11,0.08)',
-                    border: '1px solid rgba(245,158,11,0.3)',
-                    borderRadius: '12px',
-                    padding: '14px 18px',
-                    marginBottom: '24px',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '12px',
-                }}>
-                    <span style={{ fontSize: '20px', flexShrink: 0 }}>⚠️</span>
-                    <div>
-                        <p style={{ color: '#f59e0b', fontWeight: '600', margin: '0 0 4px', fontSize: '14px' }}>Usage responsable uniquement</p>
-                        <p style={{ color: 'var(--app-content-main-color)', opacity: 0.6, margin: 0, fontSize: '13px', lineHeight: '1.5' }}>
-                            Ces scripts sont fournis à des fins éducatives et de test sur vos propres machines. L'utilisation sur des systèmes tiers sans autorisation est illégale.
-                        </p>
-                    </div>
-                </div>
 
                 {/* Catégories */}
                 {scripts.map(category => (
