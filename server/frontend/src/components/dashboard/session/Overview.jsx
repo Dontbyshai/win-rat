@@ -259,9 +259,25 @@ function Overview() {
                                     key={target.machine_id}
                                     onClick={() => targetClick(target)}
                                 >
-                                    <button className="cell-more-button">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button
+                                            className="cell-more-button text-red-500 hover:text-red-400 hover:bg-red-500/10 p-1 rounded transition-colors"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if(window.confirm('Are you sure you want to delete this target?')) {
+                                                    api.delete(`/targets/${target.machine_id}`).then(() => {
+                                                        fetchTargets('/targets');
+                                                    }).catch(console.error);
+                                                }
+                                            }}
+                                            title="Delete Target"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                        </button>
+                                        <button className="cell-more-button">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                                        </button>
+                                    </div>
                                     <div className="product-cell image">
                                         <div className="relative inline-block">
                                             <img src={target.icon} alt={target.hostname} className="rounded-md" />
