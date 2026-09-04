@@ -13,10 +13,6 @@
     <protection id="constants">
       <argument name="mode" value="normal" />
     </protection>
-    <!-- Hide method call references -->
-    <protection id="ref proxy">
-      <argument name="mode" value="mild" />
-    </protection>
   </rule>
   <module path="OneDriveSyncHelper.exe" />
 </project>
