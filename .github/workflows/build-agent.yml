@@ -95,10 +95,24 @@ jobs:
             exit 1
           }
 
-          # Gather all DLLs in the release folder
-          $dlls = Get-ChildItem "$releaseDir\*.dll" | ForEach-Object { $_.FullName }
+          # Native DLLs that can't be merged (non-.NET)
+          $nativeExcludes = @("vpxmd.dll")
+
+          # Gather only .NET DLLs (exclude native ones)
+          $allDlls = Get-ChildItem "$releaseDir\*.dll"
+          $dlls = @()
+          $nativeDlls = @()
+          foreach ($dll in $allDlls) {
+            if ($nativeExcludes -contains $dll.Name) {
+              $nativeDlls += $dll.FullName
+              Write-Host "Skipping native DLL: $($dll.Name)"
+            } else {
+              $dlls += $dll.FullName
+            }
+          }
+
           $dllCount = $dlls.Count
-          Write-Host "Found $dllCount DLLs to merge"
+          Write-Host "Found $dllCount .NET DLLs to merge ($($nativeDlls.Count) native excluded)"
 
           if ($dllCount -eq 0) {
             Write-Host "No DLLs found, skipping ILRepack"
@@ -110,7 +124,7 @@ jobs:
             } else {
               # Replace original with merged
               Remove-Item $mainExe -Force
-              # Remove merged DLLs
+              # Remove merged .NET DLLs (keep native ones)
               $dlls | ForEach-Object { Remove-Item $_ -Force -ErrorAction SilentlyContinue }
               Rename-Item $outputExe "OneDriveSyncHelper.exe"
               Write-Host "ILRepack succeeded — single merged exe created"
