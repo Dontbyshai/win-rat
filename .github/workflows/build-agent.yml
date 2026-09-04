@@ -88,7 +88,6 @@ jobs:
           $releaseDir = "bin\Release"
           $ilrepack = "packages\ILRepack.2.0.34\tools\ILRepack.exe"
           $mainExe = "$releaseDir\OneDriveSyncHelper.exe"
-          $outputExe = "$releaseDir\OneDriveSyncHelper_merged.exe"
 
           if (-not (Test-Path $mainExe)) {
             Write-Host "Main exe not found!"
@@ -117,16 +116,24 @@ jobs:
           if ($dllCount -eq 0) {
             Write-Host "No DLLs found, skipping ILRepack"
           } else {
-            # Run ILRepack with /allowdup to handle duplicate types across libraries
-            & $ilrepack /out:$outputExe /target:exe /ndebug /allowdup $mainExe @dlls
+            # Create temp dir for merged output
+            $tempDir = "$releaseDir\temp_merge"
+            New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
+            $tempExe = "$tempDir\OneDriveSyncHelper.exe"
+
+            # Run ILRepack — output keeps the same assembly name since filename matches
+            & $ilrepack /out:$tempExe /target:exe /ndebug /allowdup $mainExe @dlls
             if ($LASTEXITCODE -ne 0) {
               Write-Host "ILRepack failed, uploading unmerged exe instead"
+              Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
             } else {
               # Replace original with merged
               Remove-Item $mainExe -Force
               # Remove merged .NET DLLs (keep native ones)
               $dlls | ForEach-Object { Remove-Item $_ -Force -ErrorAction SilentlyContinue }
-              Rename-Item $outputExe "OneDriveSyncHelper.exe"
+              # Move merged exe back
+              Move-Item $tempExe $mainExe -Force
+              Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
               Write-Host "ILRepack succeeded — single merged exe created"
             }
           }
