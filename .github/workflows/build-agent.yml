@@ -178,7 +178,7 @@ jobs:
           Set-Content $crproj $content
 
           Write-Host "Running ConfuserEx obfuscation..."
-          & $confuserCli.FullName $crproj
+          & $confuserCli.FullName $crproj -nopause
 
           if ($LASTEXITCODE -ne 0) {
             Write-Host "ConfuserEx failed (exit code $LASTEXITCODE), using unobfuscated exe"
