@@ -172,9 +172,9 @@ jobs:
           $crproj = "confuser.crproj"
           $absReleaseDir = (Resolve-Path $releaseDir).Path
           $content = Get-Content $crproj -Raw
-          $content = $content -replace 'baseDir="."', "baseDir=`"$absReleaseDir`""
+          $content = $content.Replace('baseDir="."', "baseDir=`"$absReleaseDir`"")
           $confusedDir = "$absReleaseDir\Confused"
-          $content = $content -replace 'outputDir="\.\.\Confused"', "outputDir=`"$confusedDir`""
+          $content = $content.Replace('outputDir="..\Confused"', "outputDir=`"$confusedDir`"")
           Set-Content $crproj $content
 
           Write-Host "Running ConfuserEx obfuscation..."
