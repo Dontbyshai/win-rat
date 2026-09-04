@@ -1,5 +1,5 @@
 <project outputDir="..\Confused" baseDir="." xmlns="http://confuser.codeplex.com">
-  <rule pattern="true" preset="normal" inherit="false">
+  <rule pattern="true" preset="none" inherit="false">
     <!-- Rename all methods/classes/fields to gibberish -->
     <protection id="rename">
       <argument name="mode" value="unicode" />
