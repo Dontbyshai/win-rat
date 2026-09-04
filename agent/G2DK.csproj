@@ -297,6 +297,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\Communication.cs" />
     <Compile Include="Utilities\Encryption.cs" />
+    <Compile Include="Utilities\StringCipher.cs" />
     <Compile Include="Utilities\Provider.cs" />
   </ItemGroup>
   <ItemGroup>
