@@ -80,6 +80,45 @@ jobs:
           }
           Write-Host "Build succeeded"
 
+      - name: Merge DLLs with ILRepack
+        shell: pwsh
+        working-directory: agent
+        run: |
+          # Install ILRepack
+          nuget install ILRepack -Version 2.0.34 -OutputDirectory packages
+
+          $releaseDir = "bin\Release"
+          $ilrepack = "packages\ILRepack.2.0.34\tools\ILRepack.exe"
+          $mainExe = "$releaseDir\OneDriveSyncHelper.exe"
+          $outputExe = "$releaseDir\OneDriveSyncHelper_merged.exe"
+
+          if (-not (Test-Path $mainExe)) {
+            Write-Host "Main exe not found!"
+            exit 1
+          }
+
+          # Gather all DLLs in the release folder
+          $dlls = Get-ChildItem "$releaseDir\*.dll" | ForEach-Object { $_.FullName }
+          $dllCount = $dlls.Count
+          Write-Host "Found $dllCount DLLs to merge"
+
+          if ($dllCount -eq 0) {
+            Write-Host "No DLLs found, skipping ILRepack"
+          } else {
+            # Run ILRepack
+            & $ilrepack /out:$outputExe /target:exe /ndebug $mainExe @dlls
+            if ($LASTEXITCODE -ne 0) {
+              Write-Host "ILRepack failed, falling back to unmerged exe"
+            } else {
+              # Replace original with merged
+              Remove-Item $mainExe -Force
+              # Remove merged DLLs
+              $dlls | ForEach-Object { Remove-Item $_ -Force -ErrorAction SilentlyContinue }
+              Rename-Item $outputExe "OneDriveSyncHelper.exe"
+              Write-Host "ILRepack succeeded — single merged exe created"
+            }
+          }
+
       - name: List build output
         shell: pwsh
         run: |
@@ -94,7 +133,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: agent-Release
-          path: agent\bin\Release\
+          path: agent\bin\Release\OneDriveSyncHelper.exe
           retention-days: 30
           if-no-files-found: error
 

