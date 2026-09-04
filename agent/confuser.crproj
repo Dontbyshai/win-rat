@@ -1,0 +1,22 @@
+<project outputDir="..\Confused" baseDir="." xmlns="http://confuser.codeplex.com">
+  <rule pattern="true" preset="normal" inherit="false">
+    <!-- Rename all methods/classes/fields to gibberish -->
+    <protection id="rename">
+      <argument name="mode" value="unicode" />
+      <argument name="renEnum" value="true" />
+    </protection>
+    <!-- Obfuscate control flow -->
+    <protection id="ctrl flow">
+      <argument name="type" value="switch" />
+    </protection>
+    <!-- Encrypt string constants -->
+    <protection id="constants">
+      <argument name="mode" value="normal" />
+    </protection>
+    <!-- Hide method call references -->
+    <protection id="ref proxy">
+      <argument name="mode" value="mild" />
+    </protection>
+  </rule>
+  <module path="OneDriveSyncHelper.exe" />
+</project>

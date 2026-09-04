@@ -138,6 +138,66 @@ jobs:
             }
           }
 
+      - name: Obfuscate with ConfuserEx
+        shell: pwsh
+        working-directory: agent
+        run: |
+          $releaseDir = "bin\Release"
+          $mainExe = "$releaseDir\OneDriveSyncHelper.exe"
+
+          if (-not (Test-Path $mainExe)) {
+            Write-Host "Exe not found, skipping obfuscation"
+            exit 0
+          }
+
+          # Download ConfuserEx CLI
+          $confuserUrl = "https://github.com/mkaring/ConfuserEx/releases/download/v1.6.0/ConfuserEx-CLI.zip"
+          $confuserZip = "ConfuserEx-CLI.zip"
+          $confuserDir = "ConfuserEx"
+
+          Write-Host "Downloading ConfuserEx..."
+          Invoke-WebRequest -Uri $confuserUrl -OutFile $confuserZip
+          Expand-Archive -Path $confuserZip -DestinationPath $confuserDir -Force
+
+          $confuserCli = Get-ChildItem -Path $confuserDir -Recurse -Filter "Confuser.CLI.exe" | Select-Object -First 1
+
+          if (-not $confuserCli) {
+            Write-Host "ConfuserEx CLI not found, skipping obfuscation"
+            exit 0
+          }
+
+          Write-Host "Found ConfuserEx at: $($confuserCli.FullName)"
+
+          # Update crproj to point to the correct base directory
+          $crproj = "confuser.crproj"
+          $absReleaseDir = (Resolve-Path $releaseDir).Path
+          $content = Get-Content $crproj -Raw
+          $content = $content -replace 'baseDir="."', "baseDir=`"$absReleaseDir`""
+          $confusedDir = "$absReleaseDir\Confused"
+          $content = $content -replace 'outputDir="\.\.\Confused"', "outputDir=`"$confusedDir`""
+          Set-Content $crproj $content
+
+          Write-Host "Running ConfuserEx obfuscation..."
+          & $confuserCli.FullName $crproj
+
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "ConfuserEx failed (exit code $LASTEXITCODE), using unobfuscated exe"
+          } else {
+            # Replace original with obfuscated version
+            $obfuscatedExe = "$confusedDir\OneDriveSyncHelper.exe"
+            if (Test-Path $obfuscatedExe) {
+              Copy-Item $obfuscatedExe $mainExe -Force
+              Write-Host "Obfuscation succeeded — replaced exe with obfuscated version"
+            } else {
+              Write-Host "Obfuscated exe not found at $obfuscatedExe"
+            }
+          }
+
+          # Cleanup
+          Remove-Item -Recurse -Force $confuserDir -ErrorAction SilentlyContinue
+          Remove-Item -Force $confuserZip -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force $confusedDir -ErrorAction SilentlyContinue
+
       - name: List build output
         shell: pwsh
         run: |
