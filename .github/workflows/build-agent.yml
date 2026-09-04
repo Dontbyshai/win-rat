@@ -117,10 +117,10 @@ jobs:
           if ($dllCount -eq 0) {
             Write-Host "No DLLs found, skipping ILRepack"
           } else {
-            # Run ILRepack
-            & $ilrepack /out:$outputExe /target:exe /ndebug $mainExe @dlls
+            # Run ILRepack with /allowdup to handle duplicate types across libraries
+            & $ilrepack /out:$outputExe /target:exe /ndebug /allowdup $mainExe @dlls
             if ($LASTEXITCODE -ne 0) {
-              Write-Host "ILRepack failed, falling back to unmerged exe"
+              Write-Host "ILRepack failed, uploading unmerged exe instead"
             } else {
               # Replace original with merged
               Remove-Item $mainExe -Force
