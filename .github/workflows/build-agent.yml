@@ -95,8 +95,8 @@ jobs:
             exit 1
           }
 
-          # Native DLLs that can't be merged (non-.NET)
-          $nativeExcludes = @("vpxmd.dll")
+          # DLLs to exclude from merge (native or duplicate)
+          $nativeExcludes = @("vpxmd.dll", "BouncyCastle.Crypto.dll")
 
           # Gather only .NET DLLs (exclude native ones)
           $allDlls = Get-ChildItem "$releaseDir\*.dll"
